@@ -11,83 +11,91 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
-public class ConsultarEquiposView extends JFrame {
+public class ConsultarEquiposView extends JPanel {
 
-    private JTextField txtFechaEvento;
-    private JTextField txtCantidadDias;
-    private JComboBox<TipoEquipo> cmbTipoEquipo;
-    private JButton btnConsultar;
+    private JTextField campoFechaEvento;
+    private JTextField campoCantidadDias;
+    private JComboBox<TipoEquipo> comboTipoEquipo;
+    private JButton botonConsultar;
     private JTable tablaResultados;
     private DefaultTableModel modeloTabla;
 
     public ConsultarEquiposView() {
-        setTitle("Consultar Equipos Disponibles");
-        setSize(600, 400);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
         inicializarComponentes();
     }
 
     private void inicializarComponentes() {
+        setLayout(new BorderLayout(10, 10));
+
         JPanel panelFiltros = new JPanel(new GridLayout(4, 2, 5, 5));
         panelFiltros.setBorder(BorderFactory.createTitledBorder("Filtros"));
 
-        txtFechaEvento  = new JTextField("AAAA-MM-DD");
-        txtCantidadDias = new JTextField();
-        cmbTipoEquipo   = new JComboBox<>(TipoEquipo.values());
-        btnConsultar    = new JButton("Consultar");
+        campoFechaEvento = new JTextField("2026-06-20");
+        campoCantidadDias = new JTextField();
+        comboTipoEquipo = new JComboBox<>(TipoEquipo.values());
+        botonConsultar = new JButton("Consultar");
 
-        panelFiltros.add(new JLabel("Fecha Evento (AAAA-MM-DD):")); panelFiltros.add(txtFechaEvento);
-        panelFiltros.add(new JLabel("Cantidad de Días:"));          panelFiltros.add(txtCantidadDias);
-        panelFiltros.add(new JLabel("Tipo de Equipo:"));            panelFiltros.add(cmbTipoEquipo);
+        panelFiltros.add(new JLabel("Fecha evento (AAAA-MM-DD):"));
+        panelFiltros.add(campoFechaEvento);
+
+        panelFiltros.add(new JLabel("Cantidad de dias:"));
+        panelFiltros.add(campoCantidadDias);
+
+        panelFiltros.add(new JLabel("Tipo de equipo:"));
+        panelFiltros.add(comboTipoEquipo);
+
         panelFiltros.add(new JLabel(""));
-        panelFiltros.add(btnConsultar);
+        panelFiltros.add(botonConsultar);
 
-        String[] columnas = {"Código", "Nombre", "Tipo", "Valor Diario", "Stock", "Instalación"};
-        modeloTabla     = new DefaultTableModel(columnas, 0);
+        String[] columnas = {"Codigo", "Nombre", "Tipo", "Valor diario", "Stock", "Instalacion"};
+        modeloTabla = new DefaultTableModel(columnas, 0);
         tablaResultados = new JTable(modeloTabla);
 
-        setLayout(new BorderLayout(10, 10));
         add(panelFiltros, BorderLayout.NORTH);
         add(new JScrollPane(tablaResultados), BorderLayout.CENTER);
 
-        btnConsultar.addActionListener(e -> consultarEquipos());
+        botonConsultar.addActionListener(e -> consultarEquipos());
     }
 
     private void consultarEquipos() {
-        LocalDate fecha;
+        LocalDate fechaEvento;
+
         try {
-            fecha = LocalDate.parse(txtFechaEvento.getText().trim());
-        } catch (DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "Formato de fecha inválido. Use AAAA-MM-DD.", "Error", JOptionPane.ERROR_MESSAGE);
+            fechaEvento = LocalDate.parse(campoFechaEvento.getText().trim());
+        } catch (DateTimeParseException error) {
+            JOptionPane.showMessageDialog(this, "Formato de fecha invalido. Use AAAA-MM-DD");
             return;
         }
 
-        int dias;
+        int cantidadDias;
+
         try {
-            dias = Integer.parseInt(txtCantidadDias.getText().trim());
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "La cantidad de días debe ser un número.", "Error", JOptionPane.ERROR_MESSAGE);
+            cantidadDias = Integer.parseInt(campoCantidadDias.getText().trim());
+        } catch (NumberFormatException error) {
+            JOptionPane.showMessageDialog(this, "La cantidad de dias debe ser un numero");
             return;
         }
 
-        TipoEquipo tipo = (TipoEquipo) cmbTipoEquipo.getSelectedItem();
+        TipoEquipo tipoEquipo = (TipoEquipo) comboTipoEquipo.getSelectedItem();
 
-        // La vista llama directo al controller que le corresponde
-        List<Equipo> disponibles = EquipoController.getInstance()
-                .consultarEquiposDisponibles(fecha, dias, tipo);
+        List<Equipo> equiposDisponibles = EquipoController.getInstance()
+                .consultarEquiposDisponibles(fechaEvento, cantidadDias, tipoEquipo);
 
         modeloTabla.setRowCount(0);
-        for (Equipo e : disponibles) {
+
+        for (Equipo equipo : equiposDisponibles) {
             modeloTabla.addRow(new Object[]{
-                    e.getCodigo(), e.getNombre(), e.getTipoEquipo(),
-                    e.getValorDiario(), e.getStockDisponible(),
-                    e.isRequiereInstalacion() ? "Sí" : "No"
+                    equipo.getCodigo(),
+                    equipo.getNombre(),
+                    equipo.getTipoEquipo(),
+                    equipo.getValorDiario(),
+                    equipo.getStockDisponible(),
+                    equipo.isRequiereInstalacion() ? "Si" : "No"
             });
         }
 
-        if (disponibles.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No hay equipos disponibles.", "Información", JOptionPane.INFORMATION_MESSAGE);
+        if (equiposDisponibles.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay equipos disponibles");
         }
     }
 }
