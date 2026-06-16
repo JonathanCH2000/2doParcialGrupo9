@@ -5,6 +5,7 @@ import mvc.model.Equipo;
 import mvc.model.TipoEquipo;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
@@ -26,32 +27,75 @@ public class ConsultarEquiposView extends JPanel {
 
     private void inicializarComponentes() {
         setLayout(new BorderLayout(10, 10));
+        setBackground(new Color(245, 245, 245));
 
-        JPanel panelFiltros = new JPanel(new GridLayout(4, 2, 5, 5));
-        panelFiltros.setBorder(BorderFactory.createTitledBorder("Filtros"));
+        // Panel de filtros con GridBagLayout para mejor control visual
+        JPanel panelFiltros = new JPanel(new GridBagLayout());
+        panelFiltros.setBackground(Color.WHITE);
+        panelFiltros.setBorder(BorderFactory.createCompoundBorder(
+                new EmptyBorder(20, 20, 10, 20),
+                BorderFactory.createTitledBorder("Filtros")
+        ));
 
-        campoFechaEvento = new JTextField("2026-06-20");
-        campoCantidadDias = new JTextField();
-        comboTipoEquipo = new JComboBox<>(TipoEquipo.values());
+        GridBagConstraints gcLabel = new GridBagConstraints();
+        gcLabel.anchor = GridBagConstraints.WEST;
+        gcLabel.insets = new Insets(8, 10, 8, 10);
+        gcLabel.gridx = 0;
+
+        GridBagConstraints gcCampo = new GridBagConstraints();
+        gcCampo.fill = GridBagConstraints.HORIZONTAL;
+        gcCampo.weightx = 1.0;
+        gcCampo.insets = new Insets(8, 0, 8, 10);
+        gcCampo.gridx = 1;
+
+        campoFechaEvento  = new JTextField("2026-06-20", 20);
+        campoCantidadDias = new JTextField(20);
+        comboTipoEquipo   = new JComboBox<>(TipoEquipo.values());
+
+        gcLabel.gridy = 0; gcCampo.gridy = 0;
+        panelFiltros.add(new JLabel("Fecha evento (AAAA-MM-DD):"), gcLabel);
+        panelFiltros.add(campoFechaEvento, gcCampo);
+
+        gcLabel.gridy = 1; gcCampo.gridy = 1;
+        panelFiltros.add(new JLabel("Cantidad de días:"), gcLabel);
+        panelFiltros.add(campoCantidadDias, gcCampo);
+
+        gcLabel.gridy = 2; gcCampo.gridy = 2;
+        panelFiltros.add(new JLabel("Tipo de equipo:"), gcLabel);
+        panelFiltros.add(comboTipoEquipo, gcCampo);
+
+        // Botón en su propio panel alineado a la derecha
         botonConsultar = new JButton("Consultar");
+        botonConsultar.setPreferredSize(new Dimension(150, 35));
+        botonConsultar.setOpaque(true);
+        botonConsultar.setBorderPainted(false);
+        botonConsultar.setBackground(new Color(59, 130, 246));
+        botonConsultar.setForeground(Color.WHITE);
+        botonConsultar.setFocusPainted(false);
 
-        panelFiltros.add(new JLabel("Fecha evento (AAAA-MM-DD):"));
-        panelFiltros.add(campoFechaEvento);
+        JPanel panelBoton = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelBoton.setBackground(Color.WHITE);
+        panelBoton.setBorder(new EmptyBorder(0, 20, 10, 20));
+        panelBoton.add(botonConsultar);
 
-        panelFiltros.add(new JLabel("Cantidad de dias:"));
-        panelFiltros.add(campoCantidadDias);
-
-        panelFiltros.add(new JLabel("Tipo de equipo:"));
-        panelFiltros.add(comboTipoEquipo);
-
-        panelFiltros.add(new JLabel(""));
-        panelFiltros.add(botonConsultar);
-
-        String[] columnas = {"Codigo", "Nombre", "Tipo", "Valor diario", "Stock", "Instalacion"};
-        modeloTabla = new DefaultTableModel(columnas, 0);
+        // Tabla con estilo
+        String[] columnas = {"Código", "Nombre", "Tipo", "Valor diario", "Stock", "Instalación"};
+        modeloTabla = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
         tablaResultados = new JTable(modeloTabla);
+        tablaResultados.setRowHeight(28);
+        tablaResultados.getTableHeader().setBackground(new Color(59, 130, 246));
+        tablaResultados.getTableHeader().setForeground(Color.WHITE);
+        tablaResultados.setSelectionBackground(new Color(219, 234, 254));
 
-        add(panelFiltros, BorderLayout.NORTH);
+        JPanel panelNorte = new JPanel(new BorderLayout());
+        panelNorte.setBackground(new Color(245, 245, 245));
+        panelNorte.add(panelFiltros, BorderLayout.CENTER);
+        panelNorte.add(panelBoton, BorderLayout.SOUTH);
+
+        add(panelNorte, BorderLayout.NORTH);
         add(new JScrollPane(tablaResultados), BorderLayout.CENTER);
 
         botonConsultar.addActionListener(e -> consultarEquipos());
@@ -63,7 +107,7 @@ public class ConsultarEquiposView extends JPanel {
         try {
             fechaEvento = LocalDate.parse(campoFechaEvento.getText().trim());
         } catch (DateTimeParseException error) {
-            JOptionPane.showMessageDialog(this, "Formato de fecha invalido. Use AAAA-MM-DD");
+            JOptionPane.showMessageDialog(this, "Formato de fecha inválido. Use AAAA-MM-DD");
             return;
         }
 
@@ -72,7 +116,7 @@ public class ConsultarEquiposView extends JPanel {
         try {
             cantidadDias = Integer.parseInt(campoCantidadDias.getText().trim());
         } catch (NumberFormatException error) {
-            JOptionPane.showMessageDialog(this, "La cantidad de dias debe ser un numero");
+            JOptionPane.showMessageDialog(this, "La cantidad de días debe ser un número");
             return;
         }
 
@@ -90,7 +134,7 @@ public class ConsultarEquiposView extends JPanel {
                     equipo.getTipoEquipo(),
                     equipo.getValorDiario(),
                     equipo.getStockDisponible(),
-                    equipo.isRequiereInstalacion() ? "Si" : "No"
+                    equipo.isRequiereInstalacion() ? "Sí" : "No"
             });
         }
 

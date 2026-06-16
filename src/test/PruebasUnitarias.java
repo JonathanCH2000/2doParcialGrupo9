@@ -13,10 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Pruebas unitarias del sistema de alquiler de equipamiento.
- * Independientes de la interfaz gráfica — se ejecutan desde main().
- */
 public class PruebasUnitarias {
 
     private static int pruebas = 0;

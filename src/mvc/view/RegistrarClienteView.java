@@ -4,6 +4,7 @@ import dto.ClienteDTO;
 import mvc.controller.ClienteController;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class RegistrarClienteView extends JPanel {
@@ -21,39 +22,82 @@ public class RegistrarClienteView extends JPanel {
     }
 
     private void inicializarComponentes() {
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(10, 10));
+        setBackground(new Color(245, 245, 245));
 
-        JPanel panel = new JPanel(new GridLayout(7, 2, 5, 5));
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        JPanel panelFormulario = new JPanel(new GridBagLayout());
+        panelFormulario.setBackground(Color.WHITE);
+        panelFormulario.setBorder(BorderFactory.createCompoundBorder(
+                new EmptyBorder(20, 20, 10, 20),
+                BorderFactory.createTitledBorder("Datos del cliente")
+        ));
 
-        campoDniCuit = new JTextField();
-        campoNombre = new JTextField();
-        campoTelefono = new JTextField();
-        campoEmail = new JTextField();
-        campoDireccion = new JTextField();
+        GridBagConstraints gcLabel = new GridBagConstraints();
+        gcLabel.anchor = GridBagConstraints.WEST;
+        gcLabel.insets = new Insets(8, 10, 8, 10);
+        gcLabel.gridx = 0;
+
+        GridBagConstraints gcCampo = new GridBagConstraints();
+        gcCampo.fill = GridBagConstraints.HORIZONTAL;
+        gcCampo.weightx = 1.0;
+        gcCampo.insets = new Insets(8, 0, 8, 10);
+        gcCampo.gridx = 1;
+
+        campoDniCuit  = new JTextField(20);
+        campoNombre   = new JTextField(20);
+        campoTelefono = new JTextField(20);
+        campoEmail    = new JTextField(20);
+        campoDireccion = new JTextField(20);
+
+        gcLabel.gridy = 0; gcCampo.gridy = 0;
+        panelFormulario.add(new JLabel("DNI/CUIT:"), gcLabel);
+        panelFormulario.add(campoDniCuit, gcCampo);
+
+        gcLabel.gridy = 1; gcCampo.gridy = 1;
+        panelFormulario.add(new JLabel("Nombre / Razón Social:"), gcLabel);
+        panelFormulario.add(campoNombre, gcCampo);
+
+        gcLabel.gridy = 2; gcCampo.gridy = 2;
+        panelFormulario.add(new JLabel("Teléfono:"), gcLabel);
+        panelFormulario.add(campoTelefono, gcCampo);
+
+        gcLabel.gridy = 3; gcCampo.gridy = 3;
+        panelFormulario.add(new JLabel("Email:"), gcLabel);
+        panelFormulario.add(campoEmail, gcCampo);
+
+        gcLabel.gridy = 4; gcCampo.gridy = 4;
+        panelFormulario.add(new JLabel("Dirección:"), gcLabel);
+        panelFormulario.add(campoDireccion, gcCampo);
+
+        // Botones
+        botonLimpiar = new JButton("Limpiar");
+        botonLimpiar.setPreferredSize(new Dimension(120, 35));
+        botonLimpiar.setOpaque(true);
+        botonLimpiar.setBorderPainted(false);
+        botonLimpiar.setBackground(new Color(200, 200, 200));
+        botonLimpiar.setForeground(Color.DARK_GRAY);
+        botonLimpiar.setFocusPainted(false);
 
         botonRegistrar = new JButton("Registrar");
-        botonLimpiar = new JButton("Limpiar");
+        botonRegistrar.setPreferredSize(new Dimension(120, 35));
+        botonRegistrar.setOpaque(true);
+        botonRegistrar.setBorderPainted(false);
+        botonRegistrar.setBackground(new Color(59, 130, 246));
+        botonRegistrar.setForeground(Color.WHITE);
+        botonRegistrar.setFocusPainted(false);
 
-        panel.add(new JLabel("DNI/CUIT:"));
-        panel.add(campoDniCuit);
+        JPanel panelBoton = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelBoton.setBackground(Color.WHITE);
+        panelBoton.setBorder(new EmptyBorder(0, 20, 10, 20));
+        panelBoton.add(botonLimpiar);
+        panelBoton.add(botonRegistrar);
 
-        panel.add(new JLabel("Nombre / razon social:"));
-        panel.add(campoNombre);
+        JPanel panelSur = new JPanel(new BorderLayout());
+        panelSur.setBackground(new Color(245, 245, 245));
+        panelSur.add(panelBoton, BorderLayout.NORTH);
 
-        panel.add(new JLabel("Telefono:"));
-        panel.add(campoTelefono);
-
-        panel.add(new JLabel("Email:"));
-        panel.add(campoEmail);
-
-        panel.add(new JLabel("Direccion:"));
-        panel.add(campoDireccion);
-
-        panel.add(botonLimpiar);
-        panel.add(botonRegistrar);
-
-        add(panel, BorderLayout.NORTH);
+        add(panelFormulario, BorderLayout.CENTER);
+        add(panelSur, BorderLayout.SOUTH);
 
         botonRegistrar.addActionListener(e -> registrarCliente());
         botonLimpiar.addActionListener(e -> limpiarFormulario());

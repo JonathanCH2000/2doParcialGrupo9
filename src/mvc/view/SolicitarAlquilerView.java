@@ -5,6 +5,7 @@ import mvc.controller.AlquilerController;
 import mvc.model.Alquiler;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -26,46 +27,84 @@ public class SolicitarAlquilerView extends JPanel {
     }
 
     private void inicializarComponentes() {
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(10, 10));
+        setBackground(new Color(245, 245, 245));
 
-        JPanel panel = new JPanel(new GridLayout(8, 2, 5, 5));
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        JPanel panelFormulario = new JPanel(new GridBagLayout());
+        panelFormulario.setBackground(Color.WHITE);
+        panelFormulario.setBorder(BorderFactory.createCompoundBorder(
+                new EmptyBorder(20, 20, 10, 20),
+                BorderFactory.createTitledBorder("Datos del alquiler")
+        ));
 
-        campoDniCuit = new JTextField();
-        campoCodigoEquipo = new JTextField();
-        campoCantidad = new JTextField();
-        campoFechaEvento = new JTextField("2026-06-20");
-        campoCantidadDias = new JTextField();
+        GridBagConstraints gcLabel = new GridBagConstraints();
+        gcLabel.anchor = GridBagConstraints.WEST;
+        gcLabel.insets = new Insets(8, 10, 8, 10);
+        gcLabel.gridx = 0;
 
-        comboTipoAlquiler = new JComboBox<>(new String[]{"COMUN", "CORPORATIVO", "MASIVO"});
+        GridBagConstraints gcCampo = new GridBagConstraints();
+        gcCampo.fill = GridBagConstraints.HORIZONTAL;
+        gcCampo.weightx = 1.0;
+        gcCampo.insets = new Insets(8, 0, 8, 10);
+        gcCampo.gridx = 1;
+
+        campoDniCuit      = new JTextField(20);
+        campoCodigoEquipo = new JTextField(20);
+        campoCantidad     = new JTextField(20);
+        campoFechaEvento  = new JTextField("2026-06-20", 20);
+        campoCantidadDias = new JTextField(20);
+        comboTipoAlquiler = new JComboBox<>(new String[]{"COMÚN", "CORPORATIVO", "MASIVO"});
+
+        gcLabel.gridy = 0; gcCampo.gridy = 0;
+        panelFormulario.add(new JLabel("DNI/CUIT cliente:"), gcLabel);
+        panelFormulario.add(campoDniCuit, gcCampo);
+
+        gcLabel.gridy = 1; gcCampo.gridy = 1;
+        panelFormulario.add(new JLabel("Código equipo:"), gcLabel);
+        panelFormulario.add(campoCodigoEquipo, gcCampo);
+
+        gcLabel.gridy = 2; gcCampo.gridy = 2;
+        panelFormulario.add(new JLabel("Cantidad:"), gcLabel);
+        panelFormulario.add(campoCantidad, gcCampo);
+
+        gcLabel.gridy = 3; gcCampo.gridy = 3;
+        panelFormulario.add(new JLabel("Fecha evento:"), gcLabel);
+        panelFormulario.add(campoFechaEvento, gcCampo);
+
+        gcLabel.gridy = 4; gcCampo.gridy = 4;
+        panelFormulario.add(new JLabel("Cantidad de días:"), gcLabel);
+        panelFormulario.add(campoCantidadDias, gcCampo);
+
+        gcLabel.gridy = 5; gcCampo.gridy = 5;
+        panelFormulario.add(new JLabel("Tipo de alquiler:"), gcLabel);
+        panelFormulario.add(comboTipoAlquiler, gcCampo);
+
+        // Botón alineado a la derecha
         botonSolicitarAlquiler = new JButton("Solicitar alquiler");
-        etiquetaResultado = new JLabel("");
+        botonSolicitarAlquiler.setPreferredSize(new Dimension(180, 35));
+        botonSolicitarAlquiler.setOpaque(true);
+        botonSolicitarAlquiler.setBorderPainted(false);
+        botonSolicitarAlquiler.setBackground(new Color(59, 130, 246));
+        botonSolicitarAlquiler.setForeground(Color.WHITE);
+        botonSolicitarAlquiler.setFocusPainted(false);
 
-        panel.add(new JLabel("DNI/CUIT cliente:"));
-        panel.add(campoDniCuit);
+        JPanel panelBoton = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelBoton.setBackground(Color.WHITE);
+        panelBoton.setBorder(new EmptyBorder(0, 20, 10, 20));
+        panelBoton.add(botonSolicitarAlquiler);
 
-        panel.add(new JLabel("Codigo equipo:"));
-        panel.add(campoCodigoEquipo);
+        // Etiqueta de resultado
+        etiquetaResultado = new JLabel(" ");
+        etiquetaResultado.setBorder(new EmptyBorder(10, 25, 10, 25));
+        etiquetaResultado.setFont(etiquetaResultado.getFont().deriveFont(Font.BOLD));
 
-        panel.add(new JLabel("Cantidad:"));
-        panel.add(campoCantidad);
+        JPanel panelSur = new JPanel(new BorderLayout());
+        panelSur.setBackground(new Color(245, 245, 245));
+        panelSur.add(panelBoton, BorderLayout.NORTH);
+        panelSur.add(etiquetaResultado, BorderLayout.CENTER);
 
-        panel.add(new JLabel("Fecha evento:"));
-        panel.add(campoFechaEvento);
-
-        panel.add(new JLabel("Cantidad dias:"));
-        panel.add(campoCantidadDias);
-
-        panel.add(new JLabel("Tipo alquiler:"));
-        panel.add(comboTipoAlquiler);
-
-        panel.add(new JLabel(""));
-        panel.add(botonSolicitarAlquiler);
-
-        panel.add(new JLabel("Resultado:"));
-        panel.add(etiquetaResultado);
-
-        add(panel, BorderLayout.NORTH);
+        add(panelFormulario, BorderLayout.CENTER);
+        add(panelSur, BorderLayout.SOUTH);
 
         botonSolicitarAlquiler.addActionListener(e -> solicitarAlquiler());
     }
