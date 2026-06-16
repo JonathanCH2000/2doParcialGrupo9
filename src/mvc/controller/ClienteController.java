@@ -1,6 +1,7 @@
 package mvc.controller;
 
 import dto.ClienteDTO;
+import mvc.exceptions.ReglaNegocioException;
 import mvc.model.*;
 
 import java.time.LocalDate;
@@ -30,8 +31,7 @@ public class ClienteController {
     public void registrarCliente(ClienteDTO dto, String usuario) {
 
         if (buscarPorDniCuit(dto.getDniCuit()) != null) {
-            throw new RuntimeException(
-                    "Ya existe un cliente con ese DNI/CUIT");
+            throw new ReglaNegocioException("Ya existe un cliente con ese DNI/CUIT");
         }
 
         Cliente cliente = new Cliente(
@@ -42,7 +42,6 @@ public class ClienteController {
                 dto.getDireccion());
 
         cliente.activar();
-
         clientes.add(cliente);
 
         HistorialCambioEstado historial = new HistorialCambioEstado(
@@ -58,14 +57,11 @@ public class ClienteController {
 
     // Busca a un cliente por Dni o Cuit
     public Cliente buscarPorDniCuit(String dniCuit) {
-
-        for (Cliente c : clientes) {
-
-            if (c.getDniCuit().equals(dniCuit)) {
-                return c;
+        for (Cliente cliente : clientes) {
+            if (cliente.getDniCuit().equals(dniCuit)) {
+                return cliente;
             }
         }
-
         return null;
     }
 

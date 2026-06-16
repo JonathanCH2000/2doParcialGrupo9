@@ -1,6 +1,7 @@
 package mvc.controller;
 
 import dto.EquipoDTO;
+import mvc.exceptions.ReglaNegocioException;
 import mvc.model.*;
 
 import java.time.LocalDate;
@@ -26,12 +27,11 @@ public class EquipoController {
         return instancia;
     }
 
-    // Registrar equipo: valida código duplicado, crea y registra historial
+    // Registrar equipo: valida codigo duplicado, crea y registra historial
     public void registrarEquipo(EquipoDTO dto, String usuario) {
 
         if (buscarPorCodigo(dto.getCodigo()) != null) {
-            throw new RuntimeException(
-                    "Ya existe un equipo con ese código");
+            throw new ReglaNegocioException("Ya existe un equipo con ese codigo");
         }
 
         Equipo equipo = new Equipo(
@@ -59,20 +59,30 @@ public class EquipoController {
     // Consultar equipos disponibles para una fecha y tipo de evento
     public List<Equipo> consultarEquiposDisponibles(LocalDate fechaEvento, int cantidadDias, TipoEquipo tipoEvento) {
         List<Equipo> disponibles = new ArrayList<>();
+
         for (Equipo equipo : equipos) {
             if (equipo.coincideTipoEvento(tipoEvento) && equipo.estaDisponible(1)) {
                 disponibles.add(equipo);
             }
         }
+
         return disponibles;
     }
 
     public Equipo buscarPorCodigo(String codigo) {
-        for (Equipo e : equipos) {
-            if (e.getCodigo().equals(codigo)) return e;
+        for (Equipo equipo : equipos) {
+            if (equipo.getCodigo().equals(codigo)) {
+                return equipo;
+            }
         }
         return null;
     }
 
-    public List<Equipo> getEquipos() { return equipos; }
+    public List<Equipo> getEquipos() {
+        return equipos;
+    }
+
+    public List<HistorialCambioEstado> getHistoriales() {
+        return historiales;
+    }
 }

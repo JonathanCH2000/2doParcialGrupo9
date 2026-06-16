@@ -9,22 +9,24 @@ public class PrincipalView extends JFrame {
 
     public PrincipalView() {
         setTitle("Sistema de Alquiler de Equipos");
-        setSize(850, 550);
+        setSize(900, 550);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        JPanel panelMenu = new JPanel(new GridLayout(1, 4));
+        JPanel panelMenu = new JPanel(new GridLayout(1, 5));
 
         JButton botonRegistrarCliente = new JButton("Registrar cliente");
         JButton botonRegistrarEquipo = new JButton("Registrar equipo");
         JButton botonSolicitarAlquiler = new JButton("Solicitar alquiler");
         JButton botonConsultarEquipos = new JButton("Consultar equipos");
+        JButton botonFinalizarAlquiler = new JButton("Finalizar alquiler");
 
         panelMenu.add(botonRegistrarCliente);
         panelMenu.add(botonRegistrarEquipo);
         panelMenu.add(botonSolicitarAlquiler);
         panelMenu.add(botonConsultarEquipos);
+        panelMenu.add(botonFinalizarAlquiler);
 
         panelContenido = new JPanel(new BorderLayout());
 
@@ -35,6 +37,7 @@ public class PrincipalView extends JFrame {
         botonRegistrarEquipo.addActionListener(e -> mostrarPanel(new RegistrarEquipoView()));
         botonSolicitarAlquiler.addActionListener(e -> mostrarPanel(new SolicitarAlquilerView()));
         botonConsultarEquipos.addActionListener(e -> mostrarPanel(new ConsultarEquiposView()));
+        botonFinalizarAlquiler.addActionListener(e -> mostrarPanel(new FinalizarAlquilerView()));
 
         mostrarPanel(new RegistrarClienteView());
     }

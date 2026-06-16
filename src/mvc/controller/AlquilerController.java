@@ -1,6 +1,7 @@
 package mvc.controller;
 
 import dto.SolicitudAlquilerDTO;
+import mvc.exceptions.ReglaNegocioException;
 import mvc.model.*;
 
 import java.time.LocalDate;
@@ -33,7 +34,7 @@ public class AlquilerController {
         return instancia;
     }
 
-    // Solicitar alquiler: busca cliente, crea alquiler según tipo
+    // Solicitar alquiler: busca cliente, crea alquiler segun tipo
     public Alquiler solicitarAlquiler(SolicitudAlquilerDTO dto, String usuario) {
 
         ClienteController clienteController = ClienteController.getInstance();
@@ -43,10 +44,43 @@ public class AlquilerController {
         Cliente cliente = clienteController.buscarPorDniCuit(dto.getDniCuit());
 
         if (cliente == null) {
-            throw new RuntimeException("Cliente no encontrado");
+            throw new ReglaNegocioException("Cliente no encontrado");
         }
 
-        // Crear alquiler según tipo
+        if (!cliente.estaActivo()) {
+            throw new ReglaNegocioException("El cliente no esta activo");
+        }
+
+        if (dto.getCantidadDias() <= 0) {
+            throw new ReglaNegocioException("La cantidad de dias debe ser mayor a cero");
+        }
+
+        if (dto.getItemsSolicitados() == null || dto.getItemsSolicitados().isEmpty()) {
+            throw new ReglaNegocioException("Debe seleccionar al menos un equipo");
+        }
+
+        // Validar equipos antes de crear el alquiler
+        for (Map.Entry<String, Integer> item : dto.getItemsSolicitados().entrySet()) {
+
+            String codigoEquipo = item.getKey();
+            int cantidad = item.getValue();
+
+            if (cantidad <= 0) {
+                throw new ReglaNegocioException("La cantidad debe ser mayor a cero");
+            }
+
+            Equipo equipo = equipoController.buscarPorCodigo(codigoEquipo);
+
+            if (equipo == null) {
+                throw new ReglaNegocioException("Equipo " + codigoEquipo + " no encontrado");
+            }
+
+            if (!equipo.estaDisponible(cantidad)) {
+                throw new ReglaNegocioException("Stock insuficiente para " + equipo.getNombre());
+            }
+        }
+
+        // Crear alquiler segun tipo
         Alquiler alquiler;
 
         switch (dto.getTipoAlquiler()) {
@@ -76,7 +110,7 @@ public class AlquilerController {
                 break;
 
             default:
-                throw new RuntimeException("Tipo de alquiler no válido");
+                throw new ReglaNegocioException("Tipo de alquiler no valido");
         }
 
         alquiler.setId(contadorId++);
@@ -89,30 +123,13 @@ public class AlquilerController {
 
             Equipo equipo = equipoController.buscarPorCodigo(codigoEquipo);
 
-            if (equipo == null) {
-                throw new RuntimeException(
-                        "Equipo " + codigoEquipo + " no encontrado");
-            }
-
-            if (!equipo.estaDisponible(cantidad)) {
-                throw new RuntimeException(
-                        "Stock insuficiente para " + equipo.getNombre());
-            }
-
             DetalleAlquiler detalle = new DetalleAlquiler(
                     equipo,
                     cantidad,
                     equipo.getValorDiario());
 
             alquiler.agregarDetalle(detalle);
-
             equipo.reservarStock(cantidad);
-        }
-
-        // Validar que el alquiler tenga al menos un equipo
-        if (alquiler.getDetalles().isEmpty()) {
-            throw new RuntimeException(
-                    "El alquiler debe contener al menos un equipo");
         }
 
         alquileres.add(alquiler);
@@ -130,13 +147,39 @@ public class AlquilerController {
         return alquiler;
     }
 
+    public void registrarSenia(int idAlquiler, double importeSenia, String usuario) {
+
+        Alquiler alquiler = buscarPorId(idAlquiler);
+
+        if (alquiler == null) {
+            throw new ReglaNegocioException("Alquiler no encontrado");
+        }
+
+        if (importeSenia <= 0) {
+            throw new ReglaNegocioException("La senia debe ser mayor a cero");
+        }
+
+        alquiler.registrarSenia(importeSenia);
+        alquiler.confirmar();
+
+        HistorialCambioEstado historial = new HistorialCambioEstado(
+                LocalDate.now(),
+                "INGRESADO",
+                "CONFIRMADO",
+                TipoEntidad.ALQUILER,
+                String.valueOf(idAlquiler),
+                usuario);
+
+        historiales.add(historial);
+    }
+
     // Finaliza el alquiler: libera stock, calcula importes y registra historial
     public double finalizarAlquiler(int idAlquiler, String usuario) {
 
         Alquiler alquiler = buscarPorId(idAlquiler);
 
         if (alquiler == null) {
-            throw new RuntimeException("Alquiler no encontrado");
+            throw new ReglaNegocioException("Alquiler no encontrado");
         }
 
         Cliente cliente = alquiler.getCliente();
@@ -152,11 +195,13 @@ public class AlquilerController {
         double importePendiente =
                 alquiler.calcularImportePendiente(porcentajeDescuento);
 
+        String estadoAnterior = alquiler.getEstado().toString();
+
         alquiler.finalizar();
 
         HistorialCambioEstado historial = new HistorialCambioEstado(
                 LocalDate.now(),
-                "ENTREGADO",
+                estadoAnterior,
                 "FINALIZADO",
                 TipoEntidad.ALQUILER,
                 String.valueOf(idAlquiler),
@@ -167,18 +212,18 @@ public class AlquilerController {
         return importePendiente;
     }
 
-    // Consulta total recaudado en un período
+    // Consulta total recaudado en un periodo
     public double totalRecaudado(LocalDate fechaDesde, LocalDate fechaHasta) {
 
         double total = 0;
 
-        for (Alquiler a : alquileres) {
+        for (Alquiler alquiler : alquileres) {
 
-            if (a.getEstado() == EstadoAlquiler.FINALIZADO
-                    && !a.getFechaEvento().isBefore(fechaDesde)
-                    && !a.getFechaEvento().isAfter(fechaHasta)) {
+            if (alquiler.getEstado() == EstadoAlquiler.FINALIZADO
+                    && !alquiler.getFechaEvento().isBefore(fechaDesde)
+                    && !alquiler.getFechaEvento().isAfter(fechaHasta)) {
 
-                total += a.getImporteTotal();
+                total += alquiler.getImporteTotal();
             }
         }
 
@@ -190,12 +235,12 @@ public class AlquilerController {
 
         List<Alquiler> resultado = new ArrayList<>();
 
-        for (Alquiler a : alquileres) {
+        for (Alquiler alquiler : alquileres) {
 
-            if (a.getCliente().getDniCuit().equals(dniCuit)
-                    && a.getEstado() == EstadoAlquiler.CONFIRMADO) {
+            if (alquiler.getCliente().getDniCuit().equals(dniCuit)
+                    && alquiler.getEstado() == EstadoAlquiler.CONFIRMADO) {
 
-                resultado.add(a);
+                resultado.add(alquiler);
             }
         }
 
@@ -204,10 +249,10 @@ public class AlquilerController {
 
     public Alquiler buscarPorId(int id) {
 
-        for (Alquiler a : alquileres) {
+        for (Alquiler alquiler : alquileres) {
 
-            if (a.coincideId(id)) {
-                return a;
+            if (alquiler.coincideId(id)) {
+                return alquiler;
             }
         }
 
@@ -232,5 +277,9 @@ public class AlquilerController {
 
     public List<Alquiler> getAlquileres() {
         return alquileres;
+    }
+
+    public List<HistorialCambioEstado> getHistoriales() {
+        return historiales;
     }
 }
