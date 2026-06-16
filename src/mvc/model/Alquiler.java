@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Alquiler {
+    // Clase abstracta, uso de herencia. Alquiler es abstracta porque nunca vas a tener un alquiler genérico
+    // Siempre vas a tener un alquiler de alguno de sus tipos: AlquilerComun, AlquilerCorporativo o AlquilerMasivo
 
     private int id;
     private LocalDate fechaSolicitud;
@@ -34,19 +36,47 @@ public abstract class Alquiler {
         this.pagos = new ArrayList<>();
     }
 
-    public abstract double obtenerPorcentajeRecargo();
+    public abstract double obtenerPorcentajeRecargo(); // metodo que implementa cada sub-clase
 
-    public void agregarDetalle(DetalleAlquiler detalle) { detalles.add(detalle); }
-    public void registrarPago(Pago pago) { pagos.add(pago); }
-    public void registrarSenia(double importe) { this.seniaAbonada = importe; }
-    public void confirmar() { this.estado = EstadoAlquiler.CONFIRMADO; }
-    public void cancelar() { this.estado = EstadoAlquiler.CANCELADO; }
-    public void pasarAEnPreparacion() { this.estado = EstadoAlquiler.EN_PREPARACION; }
-    public void entregar() { this.estado = EstadoAlquiler.ENTREGADO; }
-    public void finalizar() { this.estado = EstadoAlquiler.FINALIZADO; }
-    public boolean coincideId(int idAlquiler) { return this.id == idAlquiler; }
+    public void agregarDetalle(DetalleAlquiler detalle) {
+        detalles.add(detalle);
+    }
+
+    public void registrarPago(Pago pago) {
+        pagos.add(pago);
+    }
+
+    public void registrarSenia(double importe) {
+        this.seniaAbonada = importe;
+    }
+
+    public void confirmar() {
+        this.estado = EstadoAlquiler.CONFIRMADO;
+    }
+
+    public void cancelar() {
+        this.estado = EstadoAlquiler.CANCELADO;
+    }
+
+    public void pasarAEnPreparacion() {
+        this.estado = EstadoAlquiler.EN_PREPARACION;
+    }
+
+    public void entregar() {
+        this.estado = EstadoAlquiler.ENTREGADO;
+    }
+
+    public void finalizar() {
+        this.estado = EstadoAlquiler.FINALIZADO;
+    }
+
+    public boolean coincideId(int idAlquiler) {
+        return this.id == idAlquiler;
+    }
+
 
     public double calcularSubtotal() {
+        // recorre el DetalleAlquiler por cada item y suma el subtotal
         double subtotal = 0;
         for (DetalleAlquiler d : detalles) {
             subtotal += d.calcularSubtotal(cantidadDias);
@@ -58,10 +88,15 @@ public abstract class Alquiler {
         return calcularSubtotal() * porcentajeDescuento / 100;
     }
 
+    public double calcularRecargoAlquiler() {
+        return calcularSubtotal() * porcentajeRecargoAplicado / 100;
+    }
+
     public double calcularImporteTotal(double porcentajeDescuento) {
+        // Segun los metodos que armamos anteriormente, ahora calculamos el total
         double subtotal = calcularSubtotal();
-        double recargo = subtotal * porcentajeRecargoAplicado / 100;
-        double descuento = subtotal * porcentajeDescuento / 100;
+        double recargo = calcularRecargoAlquiler();
+        double descuento = calcularDescuentoCliente(porcentajeDescuento);
         this.importeTotal = subtotal + recargo - descuento;
         return importeTotal;
     }
@@ -72,8 +107,13 @@ public abstract class Alquiler {
     }
 
     public long calcularHorasAnticipacion(LocalDate fechaCancelacion) {
+        // Calcula cuantas horas hay entre la fecha de cancelacion y la del evento
+        // Si se superan las 72hs la seña se devuelve como credito y si no, se pierde
         return ChronoUnit.HOURS.between(fechaCancelacion.atStartOfDay(), fechaEvento.atStartOfDay());
     }
+
+
+    // Getters y Setters
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
