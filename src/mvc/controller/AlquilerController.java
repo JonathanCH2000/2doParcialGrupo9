@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import exceptions.AlquilerNoValidoException;
+import exceptions.ClienteNoEncontradoException;
+
+
 public class AlquilerController {
 
     private static AlquilerController instancia;
@@ -34,13 +38,13 @@ public class AlquilerController {
     }
 
     // UC3 - Solicitar alquiler: busca cliente, crea alquiler según tipo, valida stock y registra
-    public Alquiler solicitarAlquiler(SolicitudAlquilerDTO dto, String usuario) {
+    public Alquiler solicitarAlquiler(SolicitudAlquilerDTO dto, String usuario) throws ClienteNoEncontradoException, AlquilerNoValidoException{
         ClienteController clienteController = ClienteController.getInstance();
         EquipoController equipoController = EquipoController.getInstance();
 
         // loop: recorrer clientes para encontrar cliente
         Cliente cliente = clienteController.buscarPorDniCuit(dto.getDniCuit());
-        if (cliente == null) throw new RuntimeException("Cliente no encontrado");
+        if (cliente == null) throw new ClienteNoEncontradoException("Cliente no encontrado");
 
         // Crear alquiler según tipo
         Alquiler alquiler;
@@ -55,7 +59,7 @@ public class AlquilerController {
                 alquiler = new AlquilerMasivo(cliente, dto.getFechaEvento(), dto.getCantidadDias(), recargoMasivo);
                 break;
             default:
-                throw new RuntimeException("Tipo de alquiler no válido");
+                throw new AlquilerNoValidoException("Tipo de alquiler no válido");
         }
         alquiler.setId(contadorId++);
 
@@ -83,9 +87,9 @@ public class AlquilerController {
     }
 
     // UC4 - Finalizar alquiler: libera stock, calcula importes y registra historial
-    public double finalizarAlquiler(int idAlquiler, String usuario) {
+    public double finalizarAlquiler(int idAlquiler, String usuario) throws AlquilerNoEncontradoException{
         Alquiler alquiler = buscarPorId(idAlquiler);
-        if (alquiler == null) throw new RuntimeException("Alquiler no encontrado");
+        if (alquiler == null) throw new AlquilerNoEncontradoException("Alquiler no encontrado");
 
         Cliente cliente = alquiler.getCliente();
 

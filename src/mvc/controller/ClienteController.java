@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import exceptions.ClienteYaExisteException;
+
 public class ClienteController {
 
     private static ClienteController instancia;
@@ -27,10 +29,10 @@ public class ClienteController {
     }
 
     // UC1 - Registrar cliente: valida duplicado, crea, activa y registra historial
-    public void registrarCliente(ClienteDTO dto, String usuario) {
+    public void registrarCliente(ClienteDTO dto, String usuario) throws ClienteYaExisteException{
         for (Cliente c : clientes) {
             if (c.getDniCuit().equals(dto.getDniCuit())) {
-                throw new RuntimeException("Ya existe un cliente con ese DNI/CUIT");
+                throw new ClienteYaExisteException("Ya existe un cliente con ese DNI/CUIT");
             }
         }
         Cliente cliente = new Cliente(dto.getDniCuit(), dto.getNombreRazonSocial(),

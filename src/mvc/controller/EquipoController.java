@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import exceptions.EquipoYaExisteException;
+
 public class EquipoController {
 
     private static EquipoController instancia;
@@ -27,10 +29,10 @@ public class EquipoController {
     }
 
     // UC2 - Registrar equipo: valida código duplicado, crea y registra historial
-    public void registrarEquipo(EquipoDTO dto, String usuario) {
+    public void registrarEquipo(EquipoDTO dto, String usuario) throws EquipoYaExisteException{
         for (Equipo e : equipos) {
             if (e.getCodigo().equals(dto.getCodigo())) {
-                throw new RuntimeException("Ya existe un equipo con ese código");
+                throw new EquipoYaExisteException("Ya existe un equipo con ese código");
             }
         }
         Equipo equipo = new Equipo(dto.getCodigo(), dto.getNombre(), dto.getDescripcion(),
