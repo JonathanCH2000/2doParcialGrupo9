@@ -6,5 +6,5 @@ public enum TipoEquipo {
     PANTALLA,
     PROYECTOR,
     MOBILIARIO,
-    CARPA
+    CARPA,
 }
