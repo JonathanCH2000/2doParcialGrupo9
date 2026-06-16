@@ -1,12 +1,13 @@
 package mvc.controller;
 
 import dto.EquipoDTO;
-import mvc.exceptions.ReglaNegocioException;
 import mvc.model.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import exceptions.EquipoYaExisteException;
 
 public class EquipoController {
 
@@ -27,62 +28,39 @@ public class EquipoController {
         return instancia;
     }
 
-    // Registrar equipo: valida codigo duplicado, crea y registra historial
-    public void registrarEquipo(EquipoDTO dto, String usuario) {
-
-        if (buscarPorCodigo(dto.getCodigo()) != null) {
-            throw new ReglaNegocioException("Ya existe un equipo con ese codigo");
+    // UC2 - Registrar equipo: valida código duplicado, crea y registra historial
+    public void registrarEquipo(EquipoDTO dto, String usuario) throws EquipoYaExisteException{
+        for (Equipo e : equipos) {
+            if (e.getCodigo().equals(dto.getCodigo())) {
+                throw new EquipoYaExisteException("Ya existe un equipo con ese código");
+            }
         }
-
-        Equipo equipo = new Equipo(
-                dto.getCodigo(),
-                dto.getNombre(),
-                dto.getDescripcion(),
-                dto.getTipoEquipo(),
-                dto.getValorDiario(),
-                dto.getStockInicial(),
-                dto.isRequiereInstalacion());
-
+        Equipo equipo = new Equipo(dto.getCodigo(), dto.getNombre(), dto.getDescripcion(),
+                dto.getTipoEquipo(), dto.getValorDiario(), dto.getStockInicial(), dto.isRequiereInstalacion());
         equipos.add(equipo);
 
         HistorialCambioEstado historial = new HistorialCambioEstado(
-                LocalDate.now(),
-                "-",
-                "DISPONIBLE",
-                TipoEntidad.EQUIPO,
-                dto.getCodigo(),
-                usuario);
-
+                LocalDate.now(), "-", "DISPONIBLE", TipoEntidad.EQUIPO, dto.getCodigo(), usuario);
         historiales.add(historial);
     }
 
-    // Consultar equipos disponibles para una fecha y tipo de evento
+    // UC5 - Consultar equipos disponibles para una fecha y tipo de evento
     public List<Equipo> consultarEquiposDisponibles(LocalDate fechaEvento, int cantidadDias, TipoEquipo tipoEvento) {
         List<Equipo> disponibles = new ArrayList<>();
-
         for (Equipo equipo : equipos) {
             if (equipo.coincideTipoEvento(tipoEvento) && equipo.estaDisponible(1)) {
                 disponibles.add(equipo);
             }
         }
-
         return disponibles;
     }
 
     public Equipo buscarPorCodigo(String codigo) {
-        for (Equipo equipo : equipos) {
-            if (equipo.getCodigo().equals(codigo)) {
-                return equipo;
-            }
+        for (Equipo e : equipos) {
+            if (e.getCodigo().equals(codigo)) return e;
         }
         return null;
     }
 
-    public List<Equipo> getEquipos() {
-        return equipos;
-    }
-
-    public List<HistorialCambioEstado> getHistoriales() {
-        return historiales;
-    }
+    public List<Equipo> getEquipos() { return equipos; }
 }
