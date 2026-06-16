@@ -26,34 +26,52 @@ public class ClienteController {
         return instancia;
     }
 
-    // UC1 - Registrar cliente: valida duplicado, crea, activa y registra historial
+    // Registrar cliente
     public void registrarCliente(ClienteDTO dto, String usuario) {
-        for (Cliente c : clientes) {
-            if (c.getDniCuit().equals(dto.getDniCuit())) {
-                throw new RuntimeException("Ya existe un cliente con ese DNI/CUIT");
-            }
+
+        if (buscarPorDniCuit(dto.getDniCuit()) != null) {
+            throw new RuntimeException(
+                    "Ya existe un cliente con ese DNI/CUIT");
         }
-        Cliente cliente = new Cliente(dto.getDniCuit(), dto.getNombreRazonSocial(),
-                dto.getTelefono(), dto.getEmail(), dto.getDireccion());
+
+        Cliente cliente = new Cliente(
+                dto.getDniCuit(),
+                dto.getNombreRazonSocial(),
+                dto.getTelefono(),
+                dto.getEmail(),
+                dto.getDireccion());
+
         cliente.activar();
+
         clientes.add(cliente);
 
         HistorialCambioEstado historial = new HistorialCambioEstado(
-                LocalDate.now(), "-", "ACTIVO", TipoEntidad.CLIENTE, dto.getDniCuit(), usuario);
+                LocalDate.now(),
+                "-",
+                "ACTIVO",
+                TipoEntidad.CLIENTE,
+                dto.getDniCuit(),
+                usuario);
+
         historiales.add(historial);
     }
 
+    // Busca a un cliente por Dni o Cuit
     public Cliente buscarPorDniCuit(String dniCuit) {
+
         for (Cliente c : clientes) {  ///busca cliente por dni o cuit
             if (c.getDniCuit().equals(dniCuit)) 
             	return c;  //lo encontro
         }
         return null; //no estaba
     }
-
     public List<Cliente> getClientes() {
     	return clientes;   //agrega el cliente
     	}
     public List<HistorialCambioEstado> getHistoriales() { 
     	return historiales; }  //agrega el historial
 }
+
+
+
+

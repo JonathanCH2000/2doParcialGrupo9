@@ -1,3 +1,5 @@
+package test;
+
 import dto.ClienteDTO;
 import dto.EquipoDTO;
 import dto.SolicitudAlquilerDTO;
