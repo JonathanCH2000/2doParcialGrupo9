@@ -18,9 +18,19 @@ public class ClienteDTO {
         this.direccion = direccion;
     }
 
-    public String getDniCuit() { return dniCuit; }
-    public String getNombreRazonSocial() { return nombreRazonSocial; }
-    public String getTelefono() { return telefono; }
-    public String getEmail() { return email; }
-    public String getDireccion() { return direccion; }
+    public String getDniCuit() {
+    	return dniCuit; 
+    	}
+    public String getNombreRazonSocial() {
+    	return nombreRazonSocial; 
+    	}
+    public String getTelefono() {
+    	return telefono; 
+    	}
+    public String getEmail() {
+    	return email;
+    	}
+    public String getDireccion() {
+    	return direccion; 
+    	}
 }

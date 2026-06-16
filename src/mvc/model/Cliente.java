@@ -21,30 +21,57 @@ public class Cliente {
         this.telefono = telefono;
         this.email = email;
         this.direccion = direccion;
-        this.estado = EstadoCliente.INACTIVO;
+        this.estado = EstadoCliente.INACTIVO;  //lo crea inactivo
         this.creditoAFavor = 0;
-        this.descuentos = new ArrayList<>();
+        this.descuentos = new ArrayList<>();  //agrega el descuento a la lista
     }
 
-    public void activar() { this.estado = EstadoCliente.ACTIVO; }
-    public void inactivar() { this.estado = EstadoCliente.INACTIVO; }
-    public void agregarCredito(double importe) { this.creditoAFavor += importe; }
+    public void activar() { 
+    	this.estado = EstadoCliente.ACTIVO;
+    	}
+    public void inactivar() {
+    	this.estado = EstadoCliente.INACTIVO; 
+    	}
+    public void agregarCredito(double importe) {
+    	this.creditoAFavor += importe; 
+    	}
 
     public double obtenerDescuentoVigente(java.time.LocalDate fecha) {
         for (DescuentoCliente d : descuentos) {
-            if (d.estaVigente(fecha)) return d.getPorcentaje();
+            if (d.estaVigente(fecha)) 
+            	return d.getPorcentaje();  //retorna el porcentaje de descuento
         }
-        return 0;
+        return 0;//no hay descuento vigente
     }
 
     public boolean estaActivo() { return estado == EstadoCliente.ACTIVO; }
 
-    public String getDniCuit() { return dniCuit; }
-    public String getNombreRazonSocial() { return nombreRazonSocial; }
-    public String getTelefono() { return telefono; }
-    public String getEmail() { return email; }
-    public String getDireccion() { return direccion; }
-    public EstadoCliente getEstado() { return estado; }
-    public double getCreditoAFavor() { return creditoAFavor; }
-    public List<DescuentoCliente> getDescuentos() { return descuentos; }
+    public String getDniCuit() {
+    	return dniCuit; 
+    	}
+    public String getNombreRazonSocial() {
+    	return nombreRazonSocial; 
+    	}
+    public String getTelefono() { 
+    	return telefono; 
+    	}
+    public String getEmail() { 
+    	return email; 
+    	}
+    public String getDireccion() {
+    	return direccion; 
+    	}
+    public EstadoCliente getEstado() {
+    	return estado;
+    	}
+    public double getCreditoAFavor() { 
+    	return creditoAFavor; 
+    	}
+    public List<DescuentoCliente> getDescuentos() {
+    	return descuentos; 
+    	}
+    
+    public void addDescuentoCliente(DescuentoCliente descuento) {
+    	descuentos.add(descuento);
+    	}
 }

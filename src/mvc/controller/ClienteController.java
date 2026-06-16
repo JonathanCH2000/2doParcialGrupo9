@@ -19,7 +19,7 @@ public class ClienteController {
         this.historiales = new ArrayList<>();
     }
 
-    public static synchronized ClienteController getInstance() {
+    public static synchronized ClienteController getInstance() {  //singleton
         if (instancia == null) {
             instancia = new ClienteController();
         }
@@ -44,12 +44,16 @@ public class ClienteController {
     }
 
     public Cliente buscarPorDniCuit(String dniCuit) {
-        for (Cliente c : clientes) {
-            if (c.getDniCuit().equals(dniCuit)) return c;
+        for (Cliente c : clientes) {  ///busca cliente por dni o cuit
+            if (c.getDniCuit().equals(dniCuit)) 
+            	return c;  //lo encontro
         }
-        return null;
+        return null; //no estaba
     }
 
-    public List<Cliente> getClientes() { return clientes; }
-    public List<HistorialCambioEstado> getHistoriales() { return historiales; }
+    public List<Cliente> getClientes() {
+    	return clientes;   //agrega el cliente
+    	}
+    public List<HistorialCambioEstado> getHistoriales() { 
+    	return historiales; }  //agrega el historial
 }
